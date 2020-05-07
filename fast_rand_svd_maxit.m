@@ -1,4 +1,4 @@
-function [U, S, V] = fast_rand_svd(A,r,e)
+function [U, S, V] = fast_rand_svd_maxit(A,r,e, max_it)
 %FAST_RAND_SVD Fast Randomized computation of SVD.
 % Given an m × n matrix A, a tolerance e, and an integer r
 %(e.g. r = 10), the following scheme computes an orthonormal
@@ -8,6 +8,8 @@ function [U, S, V] = fast_rand_svd(A,r,e)
 % r is probabilty 1-10^-r
 % e is our error tolerance variable
 % A is matrix we want to find svd of
+% max_it allows us to break if unable to converge
+
 
 [M,N] = size(A);
 %Draw standard Gaussian vectors ?(1), . . . , ?(r) of length n.
@@ -27,9 +29,9 @@ mx = vecnorm(Y);
 th = e/(10*sqrt(2/pi));
 
 while mx > th
-%     if(j > max_it)
-%         break;
-%     end
+    if(j > max_it)
+        break;
+    end
     j = j+1;
     
     %Overwrite y(j) by I - Q(j-1)(Q(j-1))* y(j) 
@@ -53,9 +55,9 @@ while mx > th
     mx = max(vecnorm(Y(:,j+1:j+r)));
 end
 
-% if mx>th 
-%     error('Algorithm failed to converge');
-% end
+if mx>th 
+    error('Algorithm failed to converge');
+end
 %calculate SVD with truncated matrix
 B = Q'*A;
 [Ub, S, V] = svd(B);

@@ -5,7 +5,6 @@ clc;
 m_size = linspace(2, 100,50);
 r_size = linspace(1, 10, 10);
 e_size = [1e-10, 1e-11, 1e-12, 1e-13, 1e-14, 1e-15]
-%color = ['bo', 'mo' , 'co'];
 
 es = [];
 r = [];
