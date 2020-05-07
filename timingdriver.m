@@ -1,3 +1,4 @@
+%timing code from plots in proposal doc
 
 clear;
 clc;
