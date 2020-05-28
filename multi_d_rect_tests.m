@@ -1,0 +1,122 @@
+%timing rectangular matrices in 1, 2, or 3d 
+clear;
+clc;
+
+%set general variales
+d = 1;
+r = 20;
+%N = 200;
+
+if d == 1
+    sizes = 1:5:100;
+elseif d == 2
+    sizes = linspace(1,12,12);
+else
+    sizes = linspace(1,7,7);
+end
+     
+
+
+%set up for plotting
+rank_1 = [];
+rank_2 = [];
+
+mart_1 = [];
+mart_2 = [];
+
+matlab_1 = [];
+matlab_2 = [];
+
+figure
+for j = 1:length(sizes)
+    ell = sizes(1,j);
+    
+    %N = 2m +1
+    N = 2*(nchoosek(ell+d,d)) + 1;
+
+    p = haltonset(d,'Skip',1e3,'Leap',1e2);
+    p = scramble(p,'RR2');
+    p = net(p,N); 
+    
+    V_1 = multi_d_vand(d,ell,p);
+    
+    tol = min((1/nthroot(N,d))^(ell+1),1e-4);
+    tol = max([tol,1e-12]);
+    
+    %time martinsson's algorithm
+    tic;
+    [A1,A2,A3] = fast_rand_svd(V_1, r, tol);
+    time_1 = toc;
+    
+    %time matlab's
+    tic;
+    [A1,A2,A3] = svd(V_1);
+    time_ml_1 = toc;
+    
+    %store rank
+    rank_1 = [rank_1 min(size(V_1))];
+    
+    %store times
+    mart_1 = [mart_1 time_1];
+    matlab_1 =[matlab_1 time_ml_1];
+    
+    
+    %N = M^2    
+    N = (nchoosek(ell+d,d))^2;
+
+    p = haltonset(d,'Skip',1e3,'Leap',1e2);
+    p = scramble(p,'RR2');
+    p = net(p,N); 
+    
+    V_2 = multi_d_vand(d,ell,p);
+    
+    tol = min((1/nthroot(N,d))^(ell+1),1e-4);
+    tol = max([tol,1e-12]);
+    
+    %tine martisson's
+    tic;
+    [A1,A2,A3] = fast_rand_svd(V_2, r, tol);
+    time_2 = toc;
+    
+    %time matlab
+    tic;
+    [A1,A2,A3] = svd(V_2);
+    time_ml_2 = toc;
+    
+    %store rank
+    rank_2 = [rank_2 min(size(V_2))];
+    
+    %store times
+    mart_2 = [mart_2 time_2];
+    matlab_2 =[matlab_2 time_ml_2];
+    
+
+end
+
+subplot(2,1,1)
+plot(rank_1, mart_1, 'ro');
+drawnow;
+hold on;
+plot(rank_1, matlab_1, 'bo');
+str1 = sprintf('Rectangular Vandermonde Matrix in %dD with N = 2M + 1', d);
+title(str1);
+xlabel('Matrix Rank');
+ylabel('Time (s)');
+drawnow;
+hold on;
+
+subplot(2,1,2)
+plot(rank_2, mart_2, 'ro');
+drawnow;
+hold on;
+plot(rank_2, matlab_2, 'bo');
+str2 = sprintf('Rectangular Vandermonde Matrix in %dD with N = M^2', d);
+title(str2);
+xlabel('Matrix Rank');
+ylabel('Time (s)') ;
+drawnow;
+hold on;
+
+
+
+

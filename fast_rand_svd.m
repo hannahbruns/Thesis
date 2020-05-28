@@ -1,6 +1,6 @@
-function [U, S, V] = fast_rand_svd(A,r,e)
+function [U, S, V, mx] = fast_rand_svd(A,r,e)
 %FAST_RAND_SVD Fast Randomized computation of SVD.
-% Given an m × n matrix A, a tolerance e, and an integer r
+% Given an m ? n matrix A, a tolerance e, and an integer r
 %(e.g. r = 10), the following scheme computes an orthonormal
 % matrix Q such that (4.2) holds with probability at least 1 < min{m, n}10^r.
 
@@ -18,7 +18,7 @@ Y = A*W;
 %initialize j for loop
 j = 0;
 
-%Q(0) =[ ], the m×0 empty matrix.
+%Q(0) =[ ], the m?0 empty matrix.
 Q = zeros(M,0);
 
 mx = vecnorm(Y);
@@ -26,10 +26,13 @@ mx = vecnorm(Y);
 %error threshold for loop
 th = e/(10*sqrt(2/pi));
 
-while mx > th
-%     if(j > max_it)
-%         break;
-%     end
+%max_it 
+max_it = min([M,N]);
+
+while floor(log(abs(mx))./log(10))> floor(log(abs(th))./log(10))
+%      if(j > max_it)
+%          break;
+%      end
     j = j+1;
     
     %Overwrite y(j) by I - Q(j-1)(Q(j-1))* y(j) 
@@ -53,9 +56,9 @@ while mx > th
     mx = max(vecnorm(Y(:,j+1:j+r)));
 end
 
-% if mx>th 
-%     error('Algorithm failed to converge');
-% end
+if floor(log(abs(mx))./log(10))> floor(log(abs(th))./log(10))
+    error('Algorithm failed to converge');
+end
 %calculate SVD with truncated matrix
 B = Q'*A;
 [Ub, S, V] = svd(B);
@@ -63,4 +66,3 @@ U = Q*Ub;
 
 
 end
-
